@@ -17,17 +17,20 @@ font = pg.font.SysFont("monospace", 20)
 
 
 def make_circle_array(diameter, hue):
-    circle = np.zeros([diameter, diameter, 3])
+    circle = np.zeros((diameter, diameter, 3), int)
     center = (diameter - 1) / 2
     radius = diameter / 2
 
     color = pg.Color("white")
+    color.set_length(3)
     color.hsva = hue, 100, 100, 100
-    color = color[:3]
+
+    # Can't use 2d arrays because there seems to be a bug with
+    # pygame.surfarray.make_surface() not handling 2d arrays properly.
+    # color = (color.r << 16) + (color.g << 8) + color.b
 
     # TODO: This could be vectorized using numpy.hypot()
     # TODO: I only need to do this for a quadrant and then mirror the result around.
-    # TODO: Could use 2d array and just put int(color) in there. Test if this is faster.
     for x in range(diameter):
         for y in range(diameter):
             dx = x - center
@@ -73,6 +76,10 @@ while running:
     window.blit(fps_text, (0, 0))
 
     for i in range(3):
-        window.blit(circle_surfs[i], circle_rects[i], special_flags=pg.BLEND_RGB_ADD)
+        window.blit(
+            circle_surfs[i],
+            circle_rects[i],
+            special_flags=pg.BLEND_RGB_ADD
+        )
 
     pg.display.flip()
